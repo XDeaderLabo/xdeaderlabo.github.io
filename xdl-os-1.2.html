@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XDL OS 1.2</title>
+<style>
+:root {
+  --accent:#ff873d;
+  --accent2:#ffbd65;
+  --panel:rgba(18,22,35,.91);
+  --panel2:rgba(30,35,51,.94);
+  --text:#f4f5fa;
+  --muted:#a7adbf;
+  --border:rgba(255,255,255,.12);
+  --wallpaper:linear-gradient(135deg,#10172f 0%,#29204b 45%,#a34b38 100%);
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  color:var(--text);
+  font-family:Segoe UI,Arial,sans-serif;
+  background:var(--wallpaper);
+  user-select:none;
+}
+button,input,textarea,select {font:inherit}
+button {
+  color:var(--text);
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.07);
+  padding:9px 13px;
+  border-radius:9px;
+  cursor:pointer;
+  transition:.15s;
+}
+button:hover {background:rgba(255,255,255,.15);border-color:var(--accent)}
+button.primary {background:var(--accent);color:#21150e;border:0;font-weight:700}
+button:disabled {opacity:.4;cursor:not-allowed}
+input,textarea,select {
+  width:100%;
+  padding:10px;
+  color:var(--text);
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:none;
+}
+input:focus,textarea:focus {border-color:var(--accent)}
+textarea {resize:vertical;min-height:110px}
+#desktop {position:fixed;inset:0 0 55px 0}
+#desktopIcons {
+  display:grid;
+  grid-template-columns:repeat(1,85px);
+  gap:12px;
+  padding:18px;
+  width:110px;
+}
+.desktop-icon {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:9px 4px;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:center;
+  font-size:12px;
+}
+.desktop-icon:hover {background:rgba(255,255,255,.13)}
+.desktop-icon .emoji {font-size:29px}
+#windows {position:absolute;inset:0;pointer-events:none}
+.window {
+  position:absolute;
+  width:min(650px,calc(100vw - 24px));
+  height:min(490px,calc(100vh - 95px));
+  min-width:280px;
+  min-height:210px;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:15px;
+  box-shadow:0 22px 65px rgba(0,0,0,.42);
+  overflow:hidden;
+  backdrop-filter:blur(22px);
+  pointer-events:auto;
+}
+.window.maximized {
+  inset:8px!important;
+  width:auto!important;
+  height:auto!important;
+}
+.window.hidden {display:none}
+.titlebar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:43px;
+  padding:0 10px 0 15px;
+  background:rgba(255,255,255,.045);
+  border-bottom:1px solid var(--border);
+  cursor:move;
+  touch-action:none;
+}
+.titlebar strong {font-size:13px}
+.window-controls {display:flex;gap:5px}
+.window-controls button {padding:5px 10px;border:0}
+.window-controls .close:hover {background:#bd4242}
+.window-content {
+  flex:1;
+  padding:17px;
+  overflow:auto;
+  user-select:text;
+}
+.window-content h2 {margin:0 0 13px;font-size:21px}
+.window-content h3 {font-size:15px}
+.muted {color:var(--muted);font-size:13px}
+.section {margin-bottom:17px}
+.row {display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.row>* {flex:1}
+.app-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(125px,1fr));
+  gap:10px;
+}
+.app-card {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  text-align:left;
+  min-height:90px;
+}
+.app-card span:first-child {font-size:25px}
+.setting-card {
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  margin-bottom:10px;
+  background:rgba(255,255,255,.035);
+}
+#taskbar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:55px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  background:rgba(12,15,25,.86);
+  border-top:1px solid var(--border);
+  backdrop-filter:blur(24px);
+  z-index:10000;
+}
+#startButton {
+  font-size:20px;
+  width:43px;
+  height:42px;
+  padding:0;
+  color:var(--accent);
+}
+#taskApps {display:flex;gap:5px;flex:1;overflow:auto}
+.task-app {
+  min-width:39px;
+  height:40px;
+  padding:5px 10px;
+  position:relative;
+}
+.task-app.active:after {
+  content:"";
+  position:absolute;
+  bottom:2px;
+  left:30%;
+  width:40%;
+  height:3px;
+  border-radius:5px;
+  background:var(--accent);
+}
+#systemTray {display:flex;align-items:center;gap:8px}
+#clock {
+  text-align:right;
+  font-size:12px;
+  line-height:1.5;
+  min-width:75px;
+  cursor:pointer;
+}
+#startMenu,#quickPanel,#notificationPanel {
+  position:fixed;
+  z-index:10001;
+  bottom:63px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:15px;
+  box-shadow:0 15px 50px rgba(0,0,0,.4);
+  backdrop-filter:blur(25px);
+  display:none;
+}
+#startMenu {
+  left:10px;
+  width:min(390px,calc(100vw - 20px));
+  padding:17px;
+  max-height:min(580px,calc(100vh - 85px));
+  overflow:auto;
+}
+#startMenu.show,#quickPanel.show,#notificationPanel.show {display:block}
+#startMenu h2 {margin:0 0 12px}
+#startSearch {margin-bottom:13px}
+#startApps {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+}
+.start-app {
+  padding:12px 5px;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:12px;
+}
+.start-app:hover {background:rgba(255,255,255,.1)}
+.start-app span {display:block;font-size:25px;margin-bottom:5px}
+#quickPanel {
+  right:12px;
+  width:260px;
+  padding:15px;
+}
+#notificationPanel {
+  right:12px;
+  width:min(320px,calc(100vw - 24px));
+  padding:15px;
+}
+#notificationList {max-height:260px;overflow:auto}
+.notification {
+  padding:10px;
+  margin:8px 0;
+  background:rgba(255,255,255,.06);
+  border-radius:9px;
+  font-size:13px;
+}
+#contextMenu {
+  display:none;
+  position:fixed;
+  z-index:10002;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px;
+  min-width:175px;
+  box-shadow:0 10px 35px #0008;
+}
+#contextMenu button {display:block;width:100%;text-align:left;border:0}
+#assistantOutput {
+  min-height:75px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:rgba(0,0,0,.2);
+  font-size:13px;
+  white-space:pre-wrap;
+}
+.accent-option {
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:2px solid white;
+  padding:0;
+}
+#wallpaperChoices {display:flex;gap:9px;flex-wrap:wrap}
+.wallpaper-option {
+  width:75px;
+  height:48px;
+  border-radius:9px;
+  border:2px solid var(--border);
+}
+.phone-number {font-size:19px;text-align:center}
+#calculatorDisplay {
+  font-size:25px;
+  text-align:right;
+  margin-bottom:10px;
+}
+.calc-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+}
+.calc-grid button {font-size:17px;padding:13px 5px}
+#terminalOutput {
+  font-family:Consolas,monospace;
+  white-space:pre-wrap;
+  font-size:13px;
+  color:#b6f5bd;
+  min-height:150px;
+}
+#terminalInput {font-family:Consolas,monospace}
+@media(max-width:600px) {
+  #desktopIcons {grid-template-columns:repeat(2,75px);width:170px}
+  .window {left:8px!important;top:8px!important;width:calc(100vw - 16px)!important;height:calc(100vh - 80px)!important}
+  .window.maximized {inset:5px!important}
+  #taskbar {gap:4px;padding:5px}
+  #systemTray {gap:4px}
+  #clock {min-width:65px;font-size:11px}
+  .desktop-icon {font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div id="desktop">
+  <div id="desktopIcons">
+    <div class="desktop-icon" ondblclick="openApp('files')"><span class="emoji">📁</span>Files</div>
+    <div class="desktop-icon" ondblclick="openApp('notes')"><span class="emoji">📝</span>Notes</div>
+    <div class="desktop-icon" ondblclick="openApp('calculator')"><span class="emoji">🧮</span>Calculator</div>
+    <div class="desktop-icon" ondblclick="openApp('phone')"><span class="emoji">📞</span>Phone</div>
+    <div class="desktop-icon" ondblclick="openApp('settings')"><span class="emoji">⚙️</span>Settings</div>
+    <div class="desktop-icon" ondblclick="openApp('assistant')"><span class="emoji">🤖</span>XDL Assistant</div>
+  </div>
+  <div id="windows"></div>
+</div>
+
+<div id="startMenu">
+  <h2>Start</h2>
+  <input id="startSearch" placeholder="Search apps..." oninput="filterStartApps(this.value)">
+  <div id="startApps"></div>
+  <div class="row" style="margin-top:14px">
+    <span class="muted">XDL OS 1.2.0</span>
+    <button onclick="openApp('settings');toggleStart()">⚙️ Settings</button>
+  </div>
+</div>
+
+<div id="quickPanel">
+  <h3 style="margin-top:0">Quick settings</h3>
+  <div class="section">
+    <button style="width:100%;margin-bottom:7px" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    <button style="width:100%;margin-bottom:7px" onclick="openApp('settings')">⚙️ Personalization</button>
+    <button style="width:100%" onclick="openApp('phone')">📞 Phone</button>
+  </div>
+  <p class="muted">XDL OS 1.2.0</p>
+</div>
+
+<div id="notificationPanel">
+  <div class="row">
+    <strong>Notifications</strong>
+    <button onclick="clearNotifications()">Clear</button>
+  </div>
+  <div id="notificationList"></div>
+</div>
+
+<div id="contextMenu">
+  <button onclick="openApp('assistant');hideContext()">🤖 XDL Assistant</button>
+  <button onclick="openApp('notes');hideContext()">📝 New note</button>
+  <button onclick="openApp('settings');hideContext()">⚙️ Settings</button>
+  <button onclick="hideContext()">Close</button>
+</div>
+
+<div id="taskbar">
+  <button id="startButton" onclick="toggleStart()" title="Start menu">⊞</button>
+  <div id="taskApps"></div>
+  <div id="systemTray">
+    <button onclick="toggleQuick()" title="Quick settings">⚙</button>
+    <button onclick="toggleNotifications()" title="Notifications">🔔</button>
+    <div id="clock" onclick="openApp('calendar')" title="Open calendar"></div>
+  </div>
+</div>
+
+<script>
+const VERSION = "1.2.0";
+const apps = {
+  files:{name:"File Explorer",icon:"📁"},
+  notes:{name:"Notes",icon:"📝"},
+  calculator:{name:"Calculator",icon:"🧮"},
+  settings:{name:"Settings",icon:"⚙️"},
+  phone:{name:"Phone",icon:"📞"},
+  calendar:{name:"Calendar",icon:"📅"},
+  terminal:{name:"Terminal",icon:"⌨️"},
+  assistant:{name:"XDL Assistant",icon:"🤖"},
+  about:{name:"About XDL OS",icon:"ℹ️"}
+};
+
+let zIndex=10;
+let activeApp=null;
+let notifications=[];
+let calcValue="0";
+let calcExpression="";
+let notesTimer=null;
+
+const $ = id => document.getElementById(id);
+
+function safeStorageGet(key, fallback="") {
+  try { return localStorage.getItem(key) ?? fallback; }
+  catch { return fallback; }
+}
+function safeStorageSet(key,value) {
+  try { localStorage.setItem(key,value); }
+  catch { notify("Storage unavailable","Your browser may be blocking local storage."); }
+}
+function notify(title,message) {
+  notifications.unshift({title,message,time:new Date().toLocaleTimeString()});
+  renderNotifications();
+}
+function renderNotifications() {
+  $("notificationList").innerHTML = notifications.length
+    ? notifications.map(n=>\`<div class="notification"><strong>\${escapeHTML(n.title)}</strong><br>\${escapeHTML(n.message)}<div class="muted">\${escapeHTML(n.time)}</div></div>\`).join("")
+    : '<p class="muted">No notifications.</p>';
+}
+function clearNotifications() {
+  notifications=[];
+  renderNotifications();
+}
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function toggleStart() {
+  $("startMenu").classList.toggle("show");
+  $("quickPanel").classList.remove("show");
+  $("notificationPanel").classList.remove("show");
+  if($("startMenu").classList.contains("show")) $("startSearch").focus();
+}
+function toggleQuick() {
+  $("quickPanel").classList.toggle("show");
+  $("startMenu").classList.remove("show");
+  $("notificationPanel").classList.remove("show");
+}
+function toggleNotifications() {
+  $("notificationPanel").classList.toggle("show");
+  $("startMenu").classList.remove("show");
+  $("quickPanel").classList.remove("show");
+}
+function hideContext() {$("contextMenu").style.display="none"}
+function toggleFullscreen() {
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+function updateClock() {
+  const now=new Date();
+  $("clock").innerHTML=now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+
+    "<br>"+now.toLocaleDateString([], {month:"short",day:"numeric"});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+function renderStartApps(filter="") {
+  const list=Object.entries(apps).filter(([id,a])=>
+    (a.name+" "+id).toLowerCase().includes(filter.toLowerCase()));
+  $("startApps").innerHTML=list.map(([id,a])=>
+    \`<div class="start-app" onclick="openApp('\${id}');toggleStart()"><span>\${a.icon}</span>\${a.name}</div>\`
+  ).join("");
+}
+function filterStartApps(value){renderStartApps(value)}
+renderStartApps();
+
+const appContent = {
+  files:()=>\`
+    <h2>File Explorer</h2>
+    <p class="muted">A simple demonstration of a file workspace.</p>
+    <div class="setting-card">📁 This PC <span class="muted">Local workspace</span></div>
+    <div class="setting-card">📂 Documents <span class="muted">Your documents folder</span></div>
+    <div class="setting-card">🖼️ Pictures <span class="muted">Your pictures folder</span></div>
+    <div class="setting-card">📥 Downloads <span class="muted">Your downloads folder</span></div>
+    <p class="muted">This is an interface demo. It does not browse your device's actual files.</p>
+  \`,
+  notes:()=>\`
+    <h2>Notes</h2>
+    <p class="muted">Saved locally in this browser on this device.</p>
+    <textarea id="notesArea" placeholder="Write your notes here..."></textarea>
+    <div class="row" style="margin-top:9px">
+      <button class="primary" onclick="saveNotes()">Save notes</button>
+      <span id="notesStatus" class="muted">Ready</span>
+    </div>
+  \`,
+  calculator:()=>\`
+    <h2>Calculator</h2>
+    <input id="calculatorDisplay" value="0" readonly>
+    <div class="calc-grid">
+      \${["7","8","9","÷","4","5","6","×","1","2","3","−","0",".","=","+"].map(v=>
+        \`<button onclick="calcPress('\${v}')">\${v}</button>\`).join("")}
+      <button onclick="calcClear()" style="grid-column:span 4">Clear</button>
+    </div>
+  \`,
+  settings:()=>\`
+    <h2>Settings</h2>
+    <div class="setting-card">
+      <h3>Personalization</h3>
+      <p class="muted">Choose your XDL OS accent color.</p>
+      <div class="row">
+        \${["#ff873d","#5ca8ff","#bd7aff","#4bd6a1","#ff5d83","#f3c94f"].map(c=>
+          \`<button class="accent-option" style="background:\${c}" onclick="setAccent('\${c}')" title="\${c}"></button>\`).join("")}
+      </div>
+    </div>
+    <div class="setting-card">
+      <h3>Wallpaper</h3>
+      <div id="wallpaperChoices">
+        <button class="wallpaper-option" style="background:linear-gradient(135deg,#10172f,#29204b,#a34b38)" onclick="setWallpaper(0)"></button>
+        <button class="wallpaper-option" style="background:linear-gradient(135deg,#071e30,#126b79,#40a9a0)" onclick="setWallpaper(1)"></button>
+        <button class="wallpaper-option" style="background:linear-gradient(135deg,#171329,#593e82,#d26a80)" onclick="setWallpaper(2)"></button>
+        <button class="wallpaper-option" style="background:linear-gradient(135deg,#101b22,#31534b,#a6a65e)" onclick="setWallpaper(3)"></button>
+      </div>
+    </div>
+    <div class="setting-card">
+      <h3>System</h3>
+      <p class="muted">Version 1.2.0 · XDeader Laboratories</p>
+      <button onclick="openApp('about')">ℹ️ About XDL OS</button>
+    </div>
+    <div class="setting-card">
+      <h3>Keyboard shortcuts</h3>
+      <p class="muted">Ctrl + Space: Start menu<br>Alt + Tab: Switch apps<br>Esc: Close menus<br>Ctrl + Shift + N: Open Notes</p>
+    </div>
+  \`,
+  phone:()=>\`
+    <h2>Phone</h2>
+    <p class="muted">Use your device's configured calling app to place a call.</p>
+    <div class="section">
+      <label for="phoneNumber">Phone number</label>
+      <input id="phoneNumber" class="phone-number" type="tel" placeholder="+1 555 123 4567" autocomplete="tel">
+    </div>
+    <div class="row">
+      <button class="primary" onclick="makeCall()">📞 Open calling app</button>
+      <button onclick="clearPhoneNumber()">Clear</button>
+    </div>
+    <p class="muted">Your device will ask you to confirm the call. XDL OS does not place calls automatically.</p>
+    <div class="setting-card">
+      <strong>Compatibility</strong>
+      <p class="muted">Mobile: opens the device's default phone handler. Windows: uses the configured tel: handler, which may be Phone Link.</p>
+    </div>
+  \`,
+  calendar:()=>\`
+    <h2>Calendar</h2>
+    <div class="setting-card">
+      <h3 id="calendarToday"></h3>
+      <p id="calendarDate" class="muted"></p>
+      <p class="muted">Your device's local date and time.</p>
+    </div>
+    <button onclick="notify('Calendar','Today is '+new Date().toLocaleDateString())">Create test notification</button>
+  \`,
+  terminal:()=>\`
+    <h2>Terminal</h2>
+    <div id="terminalOutput">XDL OS Terminal 1.2.0
+Type "help" to see available commands.
+</div>
+    <input id="terminalInput" placeholder="Enter a command..." onkeydown="if(event.key==='Enter')runTerminal()">
+  \`,
+  assistant:()=>\`
+    <h2>🤖 XDL Assistant</h2>
+    <p class="muted">A local command-based assistant. It executes supported actions; it does not chat with you.</p>
+    <div class="section">
+      <input id="assistantInput" placeholder="Try: Open Notes" onkeydown="if(event.key==='Enter')runAssistant()">
+    </div>
+    <div class="row">
+      <button class="primary" onclick="runAssistant()">Run command</button>
+      <button onclick="$('assistantInput').value='';$('assistantOutput').textContent='Ready.'">Clear</button>
+    </div>
+    <div class="section" style="margin-top:13px">
+      <strong>Output</strong>
+      <div id="assistantOutput" style="margin-top:7px">Ready. Awaiting command.</div>
+    </div>
+    <div class="setting-card">
+      <strong>Try these commands</strong>
+      <p class="muted">Open Notes · Open Calculator · Open Files · Open Settings · Open Phone · Open Calendar · Open Terminal · Show Desktop · Minimize All · Toggle Fullscreen · Change Wallpaper</p>
+    </div>
+  \`,
+  about:()=>\`
+    <h2>About XDL OS</h2>
+    <div class="setting-card">
+      <div style="font-size:40px">✦</div>
+      <h2 style="margin:5px 0">XDL OS</h2>
+      <p class="muted">A project by XDeader Laboratories</p>
+      <strong>Version 1.2.0</strong>
+    </div>
+    <h3>What's new in 1.2?</h3>
+    <ul>
+      <li>New apps and interactive desktop</li>
+      <li>Phone app integration through tel: links</li>
+      <li>Keyboard shortcuts</li>
+      <li>Improved Start menu and taskbar</li>
+      <li>XDL Assistant command executor</li>
+      <li>New gradient wallpapers</li>
+      <li>Settings now includes About</li>
+    </ul>
+    <p class="muted">XDL OS is a browser-based desktop environment. It does not replace your operating system.</p>
+  \`
+};
+
+function openApp(id) {
+  if(!apps[id]) return;
+  const existing=$("window-"+id);
+  if(existing) {
+    existing.classList.remove("hidden");
+    existing.style.zIndex=++zIndex;
+    activeApp=id;
+    renderTaskbar();
+    return;
+  }
+  const win=document.createElement("div");
+  win.className="window";
+  win.id="window-"+id;
+  win.style.left=Math.max(10,Math.min(window.innerWidth-500,100+Object.keys(apps).indexOf(id)*22))+"px";
+  win.style.top=Math.max(10,Math.min(window.innerHeight-400,55+Object.keys(apps).indexOf(id)*17))+"px";
+  win.style.zIndex=++zIndex;
+  win.innerHTML=\`
+    <div class="titlebar" onpointerdown="startDrag(event,'\${id}')">
+      <strong>\${apps[id].icon} \${apps[id].name}</strong>
+      <div class="window-controls">
+        <button onclick="minimizeApp('\${id}')" title="Minimize">−</button>
+        <button onclick="maximizeApp('\${id}')" title="Maximize">□</button>
+        <button class="close" onclick="closeApp('\${id}')" title="Close">×</button>
+      </div>
+    </div>
+    <div class="window-content">\${appContent[id]()}</div>
+  \`;
+  $("windows").appendChild(win);
+  activeApp=id;
+  if(id==="notes") {
+    $("notesArea").value=safeStorageGet("xdlNotes");
+    $("notesArea").addEventListener("input",()=>{
+      $("notesStatus").textContent="Unsaved changes";
+      clearTimeout(notesTimer);
+      notesTimer=setTimeout(saveNotes,700);
+    });
+  }
+  if(id==="calendar") {
+    $("calendarToday").textContent=new Date().toLocaleDateString([], {weekday:"long"});
+    $("calendarDate").textContent=new Date().toLocaleDateString([], {year:"numeric",month:"long",day:"numeric"});
+  }
+  renderTaskbar();
+}
+function closeApp(id) {
+  $("window-"+id)?.remove();
+  if(activeApp===id) activeApp=null;
+  renderTaskbar();
+}
+function minimizeApp(id) {
+  $("window-"+id)?.classList.add("hidden");
+  if(activeApp===id) activeApp=null;
+  renderTaskbar();
+}
+function maximizeApp(id) {
+  $("window-"+id)?.classList.toggle("maximized");
+}
+function minimizeAll() {
+  document.querySelectorAll(".window").forEach(w=>w.classList.add("hidden"));
+  activeApp=null;
+  renderTaskbar();
+}
+function showDesktop() {minimizeAll()}
+function renderTaskbar() {
+  $("taskApps").innerHTML=Object.keys(apps).filter(id=>$("window-"+id)).map(id=>
+    \`<button class="task-app \${activeApp===id?"active":""}" onclick="taskAppClick('\${id}')" title="\${apps[id].name}">\${apps[id].icon}</button>\`
+  ).join("");
+}
+function taskAppClick(id) {
+  const w=$("window-"+id);
+  if(!w)return;
+  if(!w.classList.contains("hidden") && activeApp===id) minimizeApp(id);
+  else {
+    w.classList.remove("hidden");
+    w.style.zIndex=++zIndex;
+    activeApp=id;
+    renderTaskbar();
+  }
+}
+let dragState=null;
+function startDrag(e,id) {
+  if(e.target.closest("button"))return;
+  const w=$("window-"+id);
+  if(w.classList.contains("maximized"))return;
+  dragState={id,x:e.clientX,y:e.clientY,left:w.offsetLeft,top:w.offsetTop};
+  w.style.zIndex=++zIndex;
+  activeApp=id;
+  try {e.currentTarget.setPointerCapture(e.pointerId)} catch {}
+}
+document.addEventListener("pointermove",e=>{
+  if(!dragState)return;
+  const w=$("window-"+dragState.id);
+  if(!w)return;
+  w.style.left=Math.max(0,dragState.left+e.clientX-dragState.x)+"px";
+  w.style.top=Math.max(0,dragState.top+e.clientY-dragState.y)+"px";
+});
+document.addEventListener("pointerup",()=>dragState=null);
+
+function saveNotes() {
+  const area=$("notesArea");
+  if(!area)return;
+  safeStorageSet("xdlNotes",area.value);
+  $("notesStatus").textContent="Saved locally ✓";
+}
+function setAccent(color) {
+  document.documentElement.style.setProperty("--accent",color);
+  safeStorageSet("xdlAccent",color);
+  notify("Personalization","Accent color updated.");
+}
+const wallpapers=[
+  "linear-gradient(135deg,#10172f 0%,#29204b 45%,#a34b38 100%)",
+  "linear-gradient(135deg,#071e30 0%,#126b79 55%,#40a9a0 100%)",
+  "linear-gradient(135deg,#171329 0%,#593e82 55%,#d26a80 100%)",
+  "linear-gradient(135deg,#101b22 0%,#31534b 55%,#a6a65e 100%)"
+];
+function setWallpaper(index) {
+  if(!wallpapers[index])return;
+  document.documentElement.style.setProperty("--wallpaper",wallpapers[index]);
+  document.body.style.background=wallpapers[index];
+  safeStorageSet("xdlWallpaper",String(index));
+  notify("Wallpaper","Desktop wallpaper changed.");
+}
+function makeCall() {
+  const input=$("phoneNumber");
+  const number=input?.value.trim()||"";
+  if(!number) {
+    notify("Phone","Enter a phone number first.");
+    return;
+  }
+  if(!/^[+0-9().\-\s]+$/.test(number)) {
+    notify("Phone","That number contains unsupported characters.");
+    return;
+  }
+  const normalized=number.replace(/[^\d+]/g,"");
+  if(!normalized || normalized.replace(/\D/g,"").length<3) {
+    notify("Phone","Please enter a valid phone number.");
+    return;
+  }
+  window.location.href="tel:"+normalized;
+}
