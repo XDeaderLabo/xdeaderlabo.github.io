@@ -402,7 +402,7 @@ function notify(title,message) {
 }
 function renderNotifications() {
   $("notificationList").innerHTML = notifications.length
-    ? notifications.map(n=>\`<div class="notification"><strong>\${escapeHTML(n.title)}</strong><br>\${escapeHTML(n.message)}<div class="muted">\${escapeHTML(n.time)}</div></div>\`).join("")
+    ? notifications.map(n=>`<div class="notification"><strong>${escapeHTML(n.title)}</strong><br>${escapeHTML(n.message)}<div class="muted">${escapeHTML(n.time)}</div></div>`).join("")
     : '<p class="muted">No notifications.</p>';
 }
 function clearNotifications() {
@@ -447,14 +447,14 @@ function renderStartApps(filter="") {
   const list=Object.entries(apps).filter(([id,a])=>
     (a.name+" "+id).toLowerCase().includes(filter.toLowerCase()));
   $("startApps").innerHTML=list.map(([id,a])=>
-    \`<div class="start-app" onclick="openApp('\${id}');toggleStart()"><span>\${a.icon}</span>\${a.name}</div>\`
+    `<div class="start-app" onclick="openApp('${id}');toggleStart()"><span>${a.icon}</span>${a.name}</div>`
   ).join("");
 }
 function filterStartApps(value){renderStartApps(value)}
 renderStartApps();
 
 const appContent = {
-  files:()=>\`
+  files:()=>`
     <h2>File Explorer</h2>
     <p class="muted">A simple demonstration of a file workspace.</p>
     <div class="setting-card">📁 This PC <span class="muted">Local workspace</span></div>
@@ -462,8 +462,8 @@ const appContent = {
     <div class="setting-card">🖼️ Pictures <span class="muted">Your pictures folder</span></div>
     <div class="setting-card">📥 Downloads <span class="muted">Your downloads folder</span></div>
     <p class="muted">This is an interface demo. It does not browse your device's actual files.</p>
-  \`,
-  notes:()=>\`
+  `,
+  notes:()=>`
     <h2>Notes</h2>
     <p class="muted">Saved locally in this browser on this device.</p>
     <textarea id="notesArea" placeholder="Write your notes here..."></textarea>
@@ -471,24 +471,24 @@ const appContent = {
       <button class="primary" onclick="saveNotes()">Save notes</button>
       <span id="notesStatus" class="muted">Ready</span>
     </div>
-  \`,
-  calculator:()=>\`
+  `,
+  calculator:()=>`
     <h2>Calculator</h2>
     <input id="calculatorDisplay" value="0" readonly>
     <div class="calc-grid">
-      \${["7","8","9","÷","4","5","6","×","1","2","3","−","0",".","=","+"].map(v=>
-        \`<button onclick="calcPress('\${v}')">\${v}</button>\`).join("")}
+      ${["7","8","9","÷","4","5","6","×","1","2","3","−","0",".","=","+"].map(v=>
+        `<button onclick="calcPress('${v}')">${v}</button>`).join("")}
       <button onclick="calcClear()" style="grid-column:span 4">Clear</button>
     </div>
-  \`,
-  settings:()=>\`
+  `,
+  settings:()=>`
     <h2>Settings</h2>
     <div class="setting-card">
       <h3>Personalization</h3>
       <p class="muted">Choose your XDL OS accent color.</p>
       <div class="row">
-        \${["#ff873d","#5ca8ff","#bd7aff","#4bd6a1","#ff5d83","#f3c94f"].map(c=>
-          \`<button class="accent-option" style="background:\${c}" onclick="setAccent('\${c}')" title="\${c}"></button>\`).join("")}
+        ${["#ff873d","#5ca8ff","#bd7aff","#4bd6a1","#ff5d83","#f3c94f"].map(c=>
+          `<button class="accent-option" style="background:${c}" onclick="setAccent('${c}')" title="${c}"></button>`).join("")}
       </div>
     </div>
     <div class="setting-card">
@@ -509,8 +509,8 @@ const appContent = {
       <h3>Keyboard shortcuts</h3>
       <p class="muted">Ctrl + Space: Start menu<br>Alt + Tab: Switch apps<br>Esc: Close menus<br>Ctrl + Shift + N: Open Notes</p>
     </div>
-  \`,
-  phone:()=>\`
+  `,
+  phone:()=>`
     <h2>Phone</h2>
     <p class="muted">Use your device's configured calling app to place a call.</p>
     <div class="section">
@@ -526,8 +526,8 @@ const appContent = {
       <strong>Compatibility</strong>
       <p class="muted">Mobile: opens the device's default phone handler. Windows: uses the configured tel: handler, which may be Phone Link.</p>
     </div>
-  \`,
-  calendar:()=>\`
+  `,
+  calendar:()=>`
     <h2>Calendar</h2>
     <div class="setting-card">
       <h3 id="calendarToday"></h3>
@@ -535,15 +535,15 @@ const appContent = {
       <p class="muted">Your device's local date and time.</p>
     </div>
     <button onclick="notify('Calendar','Today is '+new Date().toLocaleDateString())">Create test notification</button>
-  \`,
-  terminal:()=>\`
+  `,
+  terminal:()=>`
     <h2>Terminal</h2>
     <div id="terminalOutput">XDL OS Terminal 1.2.0
 Type "help" to see available commands.
 </div>
     <input id="terminalInput" placeholder="Enter a command..." onkeydown="if(event.key==='Enter')runTerminal()">
-  \`,
-  assistant:()=>\`
+  `,
+  assistant:()=>`
     <h2>🤖 XDL Assistant</h2>
     <p class="muted">A local command-based assistant. It executes supported actions; it does not chat with you.</p>
     <div class="section">
@@ -561,8 +561,8 @@ Type "help" to see available commands.
       <strong>Try these commands</strong>
       <p class="muted">Open Notes · Open Calculator · Open Files · Open Settings · Open Phone · Open Calendar · Open Terminal · Show Desktop · Minimize All · Toggle Fullscreen · Change Wallpaper</p>
     </div>
-  \`,
-  about:()=>\`
+  `,
+  about:()=>`
     <h2>About XDL OS</h2>
     <div class="setting-card">
       <div style="font-size:40px">✦</div>
@@ -581,7 +581,7 @@ Type "help" to see available commands.
       <li>Settings now includes About</li>
     </ul>
     <p class="muted">XDL OS is a browser-based desktop environment. It does not replace your operating system.</p>
-  \`
+  `
 };
 
 function openApp(id) {
@@ -600,17 +600,17 @@ function openApp(id) {
   win.style.left=Math.max(10,Math.min(window.innerWidth-500,100+Object.keys(apps).indexOf(id)*22))+"px";
   win.style.top=Math.max(10,Math.min(window.innerHeight-400,55+Object.keys(apps).indexOf(id)*17))+"px";
   win.style.zIndex=++zIndex;
-  win.innerHTML=\`
-    <div class="titlebar" onpointerdown="startDrag(event,'\${id}')">
-      <strong>\${apps[id].icon} \${apps[id].name}</strong>
+  win.innerHTML=`
+    <div class="titlebar" onpointerdown="startDrag(event,'${id}')">
+      <strong>${apps[id].icon} ${apps[id].name}</strong>
       <div class="window-controls">
-        <button onclick="minimizeApp('\${id}')" title="Minimize">−</button>
-        <button onclick="maximizeApp('\${id}')" title="Maximize">□</button>
-        <button class="close" onclick="closeApp('\${id}')" title="Close">×</button>
+        <button onclick="minimizeApp('${id}')" title="Minimize">−</button>
+        <button onclick="maximizeApp('${id}')" title="Maximize">□</button>
+        <button class="close" onclick="closeApp('${id}')" title="Close">×</button>
       </div>
     </div>
-    <div class="window-content">\${appContent[id]()}</div>
-  \`;
+    <div class="window-content">${appContent[id]()}</div>
+  `;
   $("windows").appendChild(win);
   activeApp=id;
   if(id==="notes") {
@@ -648,7 +648,7 @@ function minimizeAll() {
 function showDesktop() {minimizeAll()}
 function renderTaskbar() {
   $("taskApps").innerHTML=Object.keys(apps).filter(id=>$("window-"+id)).map(id=>
-    \`<button class="task-app \${activeApp===id?"active":""}" onclick="taskAppClick('\${id}')" title="\${apps[id].name}">\${apps[id].icon}</button>\`
+    `<button class="task-app ${activeApp===id?"active":""}" onclick="taskAppClick('${id}')" title="${apps[id].name}">${apps[id].icon}</button>`
   ).join("");
 }
 function taskAppClick(id) {
@@ -723,3 +723,162 @@ function makeCall() {
   }
   window.location.href="tel:"+normalized;
 }
+
+
+function clearPhoneNumber(){const input=$("phoneNumber");if(input)input.value=""}
+
+/* Safe arithmetic parser: accepts arithmetic only, never evaluates JavaScript. */
+function evaluateMath(source){
+ const tokens=source.match(/\d*\.?\d+|[()+\-*/]/g)||[];
+ if(tokens.join("")!==source.replace(/\s/g,""))throw Error("Invalid expression");
+ let pos=0;
+ function primary(){
+  const t=tokens[pos++];
+  if(t==="("){const v=expression();if(tokens[pos++]!==")")throw Error("Missing )");return v}
+  if(t==="+")return primary();
+  if(t==="-")return -primary();
+  const n=Number(t);if(!Number.isFinite(n))throw Error("Number expected");return n;
+ }
+ function term(){let v=primary();while(tokens[pos]==="*"||tokens[pos]==="/"){const op=tokens[pos++],r=primary();v=op==="*"?v*r:v/r}return v}
+ function expression(){let v=term();while(tokens[pos]==="+"||tokens[pos]==="-"){const op=tokens[pos++],r=term();v=op==="+"?v+r:v-r}return v}
+ const result=expression();
+ if(pos!==tokens.length||!Number.isFinite(result))throw Error("Invalid calculation");
+ return result;
+}
+function calcPress(value){
+ if(value==="="){
+  try{
+   if(!calcExpression)return;
+   const result=evaluateMath(calcExpression);
+   calcValue=String(Number(result.toFixed(8)));
+   calcExpression=calcValue;
+  }catch{calcValue="Error";calcExpression=""}
+ }else{
+  const map={"÷":"/","×":"*","−":"-"};
+  if(calcValue==="Error"){calcValue="0";calcExpression=""}
+  calcExpression+=map[value]||value;
+  calcValue=calcExpression;
+ }
+ if($("calculatorDisplay"))$("calculatorDisplay").value=calcValue;
+}
+function calcClear(){
+ calcValue="0";calcExpression="";
+ if($("calculatorDisplay"))$("calculatorDisplay").value="0";
+}
+function runAssistant(){
+ const input=$("assistantInput"),output=$("assistantOutput");
+ if(!input||!output)return;
+ const command=input.value.trim().toLowerCase();
+ if(!command){output.textContent="Please enter a command.";return}
+ const aliases={
+  "open notes":"notes","open note":"notes",
+  "open calculator":"calculator",
+  "open files":"files","open file explorer":"files",
+  "open settings":"settings","open phone":"phone",
+  "open calendar":"calendar","open terminal":"terminal",
+  "open about":"about","open about xdl os":"about"
+ };
+ if(aliases[command]){
+  const id=aliases[command];
+  output.textContent="Launching "+apps[id].name+"...";
+  openApp(id);return;
+ }
+ if(command==="show desktop"||command==="minimize all"){
+  minimizeAll();output.textContent="Desktop displayed.";return;
+ }
+ if(command==="toggle fullscreen"){
+  toggleFullscreen();output.textContent="Fullscreen command sent.";return;
+ }
+ if(command==="change wallpaper"){
+  const current=Number(safeStorageGet("xdlWallpaper","0"));
+  setWallpaper((current+1)%wallpapers.length);
+  output.textContent="Wallpaper changed.";return;
+ }
+ if(command==="what time is it"||command==="show time"){
+  output.textContent="Current time: "+new Date().toLocaleTimeString();return;
+ }
+ if(command==="what version is this"||command==="version"){
+  output.textContent="XDL OS version "+VERSION;return;
+ }
+ if(command==="hello xdl"||command==="hello"){
+  output.textContent="Hello, Operator. XDL systems are ready.";return;
+ }
+ if(command==="who built you"){
+  output.textContent="XDL OS was created as a project by XDeader Laboratories.";return;
+ }
+ output.textContent='Unknown command. Try "Open Notes", "Open Calculator", "Show Desktop", or "Change Wallpaper".';
+}
+function runTerminal(){
+ const input=$("terminalInput"),output=$("terminalOutput");
+ if(!input||!output)return;
+ const command=input.value.trim().toLowerCase();input.value="";
+ const responses={
+  help:"Available commands: help, version, time, apps, clear, open notes, open calculator, open files, open settings, open phone, open assistant, desktop, whoami",
+  version:"XDL OS "+VERSION,
+  time:new Date().toLocaleString(),
+  apps:Object.keys(apps).join(", "),
+  "open notes":()=>openApp("notes"),
+  "open calculator":()=>openApp("calculator"),
+  "open files":()=>openApp("files"),
+  "open settings":()=>openApp("settings"),
+  "open phone":()=>openApp("phone"),
+  "open assistant":()=>openApp("assistant"),
+  desktop:()=>minimizeAll(),
+  whoami:()=>"XDL OS local user session"
+ };
+ if(command==="clear"){output.textContent="";return}
+ const response=responses[command];
+ if(typeof response==="function"){
+  response();
+  output.textContent+="\n> "+command+"\nCommand executed.";
+ }else{
+  output.textContent+="\n> "+command+"\n"+(response||"Command not found. Type help.");
+ }
+ output.scrollTop=output.scrollHeight;
+}
+
+/* Keyboard shortcuts and desktop context menu. */
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){
+  $("startMenu").classList.remove("show");
+  $("quickPanel").classList.remove("show");
+  $("notificationPanel").classList.remove("show");
+  hideContext();
+ }
+ if(e.ctrlKey&&e.code==="Space"){e.preventDefault();toggleStart()}
+ if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==="n"){e.preventDefault();openApp("notes")}
+ if(e.altKey&&e.key==="Tab"){
+  const visible=Object.keys(apps).filter(id=>$("window-"+id));
+  if(visible.length){
+   e.preventDefault();
+   const index=visible.indexOf(activeApp);
+   taskAppClick(visible[(index+1)%visible.length]);
+  }
+ }
+});
+$("desktop").addEventListener("contextmenu",e=>{
+ if(e.target.closest(".window"))return;
+ e.preventDefault();
+ const menu=$("contextMenu");
+ menu.style.display="block";
+ menu.style.left=Math.min(e.clientX,window.innerWidth-190)+"px";
+ menu.style.top=Math.min(e.clientY,window.innerHeight-180)+"px";
+});
+document.addEventListener("click",e=>{
+ if(!e.target.closest("#contextMenu"))hideContext();
+ if(!e.target.closest("#startMenu")&&!e.target.closest("#startButton"))$("startMenu").classList.remove("show");
+ if(!e.target.closest("#quickPanel")&&!e.target.closest("#systemTray button:first-child"))$("quickPanel").classList.remove("show");
+ if(!e.target.closest("#notificationPanel")&&!e.target.closest("#systemTray button:nth-child(2)"))$("notificationPanel").classList.remove("show");
+});
+function loadPreferences(){
+ const accent=safeStorageGet("xdlAccent");
+ if(accent&&/^#[0-9a-f]{6}$/i.test(accent))document.documentElement.style.setProperty("--accent",accent);
+ const wallpaper=Number(safeStorageGet("xdlWallpaper","0"));
+ if(wallpapers[wallpaper])document.body.style.background=wallpapers[wallpaper];
+}
+loadPreferences();
+renderNotifications();
+
+</script>
+</body>
+</html>
